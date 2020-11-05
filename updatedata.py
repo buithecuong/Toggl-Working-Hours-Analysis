@@ -1,7 +1,5 @@
-from retrievedata import connect_to_email_smtplib
+from retrievedata import *
+import os
 
+cnx, cursor = connect_to_database(password=str(os.environ['MYSQL_SECRET']), schema='dashboard')
 
-help(connect_to_email_smtplib)
-
-
-print("asdf")

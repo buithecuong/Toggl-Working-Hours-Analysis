@@ -2,6 +2,9 @@ import smtplib, ssl
 import mysql.connector
 import imaplib
 import pprint
+import os
+from toggl.TogglPy import Toggl
+
 
 def connect_to_email_smtplib(host,user,password):
     '''This function connects to a email acc via smtplib to send emails
@@ -45,10 +48,15 @@ def connect_to_database(password,schema,user='root',port='3308',host='127.0.0.1'
         cursor: cnx.cursor()
     '''
 
-    cnx = mysql.connector.connect(user=user, password=password,
+    cnx = mysql.connector.connect(user=user,
+                                  password=password,
                                   host=host,
                                   port=port,
                                   database=schema)
     cursor = cnx.cursor()
 
     return(cnx, cursor)
+
+def connect_to_toggl():
+    toggl = Toggl()
+    toggl.setAuthCredentials('dmnkplzr@googlemail.com', 'Fcholzheim1995+')
