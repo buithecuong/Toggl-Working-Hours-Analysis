@@ -7,6 +7,7 @@ from toggl.TogglPy import Toggl
 import requests
 import base64
 from datetime import date
+import pandas as pd
 
 def connect_to_database(password,schema,user='root',port='3308',host='127.0.0.1'):
     '''Connects to mysql database'''
@@ -65,4 +66,20 @@ def get_all_time_entries(headers, start_date):
     return time_entries
 
 def data_processing(clients,projects,time_entries):
-    pass
+    projects_filtered = [{'pid': item['id'],
+                          'cid': item['cid'],
+                          'project_name': item['name']} for item in projects]
+
+    clients_filtered = [{'cid': item['id'],
+                         'client_name': item['name']} for item in clients]
+
+    projects_df = pd.DataFrame(data=projects_filtered)
+    clients_df = pd.DataFrame(data=clients_filtered)
+    time_entries_df = pd.DataFrame(data=time_entries)
+
+    join_projects_clients = projects_df.set_index('cid').join(clients_df.set_index('cid'))
+    time_entries_extended = time_entries_df.set_index('pid').join(join_projects_clients.set_index('pid'))
+
+    return time_entries_extended
+
+def web_scraper_puplic_holidays():
