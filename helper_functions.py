@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
+import config
 
 def connect_to_database(password,schema,user='root',port='3308',host='127.0.0.1'):
     '''Connects to mysql database'''
@@ -83,7 +84,7 @@ def data_processing(clients,projects,time_entries):
 
     return time_entries_extended
 
-def define_working_days_table(start_date = date(2020, 8, 17), end_date = date.today()):
+def define_working_days_table(start_date = config.start_date_time_tracking, end_date = date.today()):
 
     def web_scraper_puplic_holidays():
         '''
@@ -141,7 +142,13 @@ def define_working_days_table(start_date = date(2020, 8, 17), end_date = date.to
 
     print(f"Number of workdays between start and end date (minus puplic holidays): {len(workdays_without_puplic_holidays_df)}")
 
-    return workdays_without_puplic_holidays_df
+    vacation_days_df = pd.DataFrame(data=config.vacation_days)
+    vacation_days_df = vacation_days_df.rename(columns={0: "days"})
+    workdays_without_ph_and_vacation_df = anti_join(workdays_without_puplic_holidays_df, vacation_days_df, on="days")
+
+    print(f"Number of workdays between start and end date (minus puplic holidays and vacation days): {len(workdays_without_ph_and_vacation_df)}")
+
+    return workdays_without_ph_and_vacation_df
 
 def input_vacation_days():
     pass
