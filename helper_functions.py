@@ -156,7 +156,7 @@ def define_working_days_table(start_date = config.start_date_time_tracking, end_
     working_days = []
     for item in all_days_we_ph_pto:
         if item['type'] == "WD":
-            working_days.append({'days': item['days'], 'type': item['type'], 'working_hours': 7})
+            working_days.append({'days': item['days'], 'type': item['type'], 'working_hours': config.target_hours_per_day})
         else:
             working_days.append({'days': item['days'], 'type': item['type'], 'working_hours': 0})
 
