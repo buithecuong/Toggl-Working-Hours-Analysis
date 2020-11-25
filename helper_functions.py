@@ -8,14 +8,14 @@ import re
 from datetime import datetime
 import config
 
-def connect_to_database(password,schema,user='root',port='3308',host='127.0.0.1'):
+def connect_to_database(password, database, user, port, host):
     '''Connects to mysql database'''
 
     cnx = mysql.connector.connect(user=user,
                                   password=password,
                                   host=host,
                                   port=port,
-                                  database=schema)
+                                  database=database)
     cursor = cnx.cursor()
 
     return(cnx, cursor)
@@ -23,7 +23,7 @@ def connect_to_database(password,schema,user='root',port='3308',host='127.0.0.1'
 def connect_to_toggl(api_token):
     """Connect to toggl and get response containing information to the
     :param api_token:   Token for you user profile, you can find the token at
-                        Toggl.com at the end of your profile page
+                        Toggl.com at the end of the profile settings page
     """
 
     string = api_token + ':api_token'
@@ -53,11 +53,8 @@ def get_all_clients_and_projects(my_workspace, headers):
 
     return clients, projects
 
-def get_all_time_entries(headers, start_date):
+def get_all_time_entries(headers, start_date, end_date):
     '''Finds all time entries in the time frame [start_date - end_date]'''
-
-    today = date.today()
-    end_date = today.strftime("%Y-%m-%d")
 
     url = 'https://api.track.toggl.com/api/v8/time_entries?start_date=' + start_date + 'T15%3A42%3A46%2B02%3A00&end_date=' + end_date + 'T15%3A42%3A46%2B02%3A00'
     time_entries = requests.get(url, headers=headers).json()
@@ -80,12 +77,21 @@ def data_processing(clients,projects,time_entries):
     time_entries_df = pd.DataFrame(data=time_entries)
 
     join_projects_clients = projects_df.set_index('cid').join(clients_df.set_index('cid'))
-    time_entries_extended = time_entries_df.set_index('pid').join(join_projects_clients.set_index('pid'))
+    time_entries_extended_df = time_entries_df.set_index('pid').join(join_projects_clients.set_index('pid'))
 
-    return time_entries_extended
+    return time_entries_extended_df
 
 def define_working_days_table(start_date = config.start_date_time_tracking, end_date = date.today()):
-
+    """
+    :return:    Returns a data frame with all days in the defined time frame (start_date - end_date)
+                The data frame has two columns: days and type
+                :Days: contains all dates in the time frame
+                :Type: the information if the day is a
+                        - working day (WD)
+                        - vacation day (paid time off - PTO)
+                        - puplic holiday (PH)
+                        - weekend (WE) - saturday and sunday
+    """
     def web_scraper_puplic_holidays():
         '''
         The following code retrieves the source code from https://www.ferienwiki.de/feiertage/de/bayern and
@@ -110,45 +116,52 @@ def define_working_days_table(start_date = config.start_date_time_tracking, end_
                 pass
 
         puplic_holidays_df = pd.DataFrame(data=puplic_holidays)
-        return puplic_holidays_df.rename(columns={0: "days"})
+        puplic_holidays_df = puplic_holidays_df.rename(columns={0: "days"})
+        return puplic_holidays
 
-    puplic_holidays_df = web_scraper_puplic_holidays()
+    puplic_holidays = web_scraper_puplic_holidays()
 
     all_days = []
     for n in range(int((end_date - start_date).days)):
         day = start_date + timedelta(n)
-        all_days.append(day)
-
-    print(f"Number of days between start and end date: {len(all_days)}")
+        all_days.append({'days': day, 'type': "WD"})
 
     workdays_index = [0, 1, 2, 3, 4]
-    workdays = []
-    for day in all_days:
-        if date.weekday(day) in workdays_index:
-            workdays.append(day)
+    all_days_we = []
+    for item in all_days:
+        if date.weekday(item['days']) in workdays_index:
+            all_days_we.append({'days': item['days'], 'type': item['type']})
+        else:
+            all_days_we.append({'days': item['days'], 'type': "WE"})
 
-    print(f"Number of workdays between start and end date: {len(workdays)}")
+    all_days_we_ph = []
+    for item in all_days_we:
+        if item['days'] in puplic_holidays:
+            all_days_we_ph.append({'days': item['days'], 'type': "PH"})
+        else:
+            all_days_we_ph.append({'days': item['days'], 'type': item['type']})
 
-    workdays_df = pd.DataFrame(data=workdays)
-    workdays_df = workdays_df.rename(columns={0: "days"})
+    all_days_we_ph_pto = []
+    for item in all_days_we_ph:
+        if item['days'] in config.vacation_days:
+            all_days_we_ph_pto.append({'days': item['days'], 'type': "PTO"})
+        else:
+            all_days_we_ph_pto.append({'days': item['days'], 'type': item['type']})
 
-    def anti_join(x, y, on):
-        """Return rows in x which are not present in y"""
-        ans = pd.merge(left=x, right=y, how='left', indicator=True, on=on)
-        ans = ans.loc[ans._merge == 'left_only', :].drop(columns='_merge')
-        return ans
+    print(f"Number of days between start and end date: {len(all_days_we_ph_pto)}")
+    print(f"Number of weekend days between start and end date: {len([1 for item in all_days_we_ph_pto if item['type'] == 'WE'])}")
+    print(f"Number of puplic holidays between start and end date (minus puplic holidays): {len([1 for item in all_days_we_ph_pto if item['type'] == 'PH'])}")
+    print(f"Number of vacation days between start and end date (minus puplic holidays and vacation days): {len([1 for item in all_days_we_ph_pto if item['type'] == 'PTO'])}")
 
-    workdays_without_puplic_holidays_df = anti_join(workdays_df, puplic_holidays_df, on="days")
+    working_days = []
+    for item in all_days_we_ph_pto:
+        if item['type'] == "WD":
+            working_days.append({'days': item['days'], 'type': item['type'], 'working_hours': 7})
+        else:
+            working_days.append({'days': item['days'], 'type': item['type'], 'working_hours': 0})
 
-    print(f"Number of workdays between start and end date (minus puplic holidays): {len(workdays_without_puplic_holidays_df)}")
-
-    vacation_days_df = pd.DataFrame(data=config.vacation_days)
-    vacation_days_df = vacation_days_df.rename(columns={0: "days"})
-    workdays_without_ph_and_vacation_df = anti_join(workdays_without_puplic_holidays_df, vacation_days_df, on="days")
-
-    print(f"Number of workdays between start and end date (minus puplic holidays and vacation days): {len(workdays_without_ph_and_vacation_df)}")
-
-    return workdays_without_ph_and_vacation_df
+    working_days_df = pd.DataFrame(data=working_days)
+    return working_days_df
 
 def input_vacation_days():
     pass
@@ -197,7 +210,6 @@ def write_toggl_data_in_database(cursor, cnx, time_entries_extended):
     # Create a new record
     sql = "INSERT INTO `toggl_time_entries` (`id`, `start`, `stop`, `duration`, `description`, `project_name`, `client_name`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
     for index, line in time_entries_extended.iterrows():
-        # import pdb; pdb.set_trace()
         if int(line['duration']) > 0:
             try:
                 cursor.execute(sql, (line['id'],
@@ -217,18 +229,16 @@ def write_toggl_data_in_database(cursor, cnx, time_entries_extended):
 
     return return_messages
 
-def write_puplic_holidays_in_database(cursor, cnx, time_entries_extended):
-    return_messages=[]
+def write_working_days_list(cursor, cnx, working_days_df):
+    '''Creates the table working_days in the mysql database'''
 
+    return_messages=[]
     try:
-        cursor.execute("CREATE TABLE `dashboard`.`toggl_time_entries` ("
+        cursor.execute("CREATE TABLE `dashboard`.`working_days` ("
                        "`id` INT NOT NULL,"
-                       "`start` DATETIME NULL,"
-                       "`stop` DATETIME NULL,"
-                       "`duration` INT NULL,"
-                       "`description` VARCHAR(45) NULL,"
-                       "`project_name` VARCHAR(45) NULL,"
-                       "`client_name` VARCHAR(45) NULL,"
+                       "`days` DATETIME NULL,"
+                       "`type` VARCHAR(45) NULL,"
+                       "`working_hours` INT NULL,"
                        "PRIMARY KEY (`id`));")
         cnx.commit()
     except mysql.connector.Error as e:
@@ -238,46 +248,38 @@ def write_puplic_holidays_in_database(cursor, cnx, time_entries_extended):
         return_messages.append("Error:" + str(e))
 
         try:
-            cursor.execute("DROP TABLE `dashboard`.`toggl_time_entries`")
-            return_messages.append("Current table toggl_time_entries was deleted successfully")
+            cursor.execute("DROP TABLE `dashboard`.`working_days`")
+            return_messages.append("Current table working_days was deleted successfully")
         except:
-            return_messages.append("Error while deleting table toggl_time_entries")
+            return_messages.append("Error while deleting table working_days")
 
         try:
-            cursor.execute("CREATE TABLE `dashboard`.`toggl_time_entries` ("
+            cursor.execute("CREATE TABLE `dashboard`.`working_days` ("
                            "`id` INT NOT NULL,"
-                           "`start` DATETIME NULL,"
-                           "`stop` DATETIME NULL,"
-                           "`duration` INT NULL,"
-                           "`description` VARCHAR(45) NULL,"
-                           "`project_name` VARCHAR(45) NULL,"
-                           "`client_name` VARCHAR(45) NULL,"
+                           "`days` DATETIME NULL,"
+                           "`type` VARCHAR(45) NULL,"
+                           "`working_hours` INT NULL,"
                            "PRIMARY KEY (`id`));")
             cnx.commit()
-            return_messages.append("Table toggl_time_entries was created successfully")
+            return_messages.append("Table working_days was created successfully")
         except:
-            return_messages.append("Error while creating table toggl_time_entries")
+            return_messages.append("Error while creating table working_days")
 
     # Create a new record
-    sql = "INSERT INTO `toggl_time_entries` (`id`, `start`, `stop`, `duration`, `description`, `project_name`, `client_name`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    for index, line in time_entries_extended.iterrows():
-        # import pdb; pdb.set_trace()
-        if int(line['duration']) > 0:
-            try:
-                cursor.execute(sql, (line['id'],
-                                     line['start'],
-                                     line['stop'],
-                                     line['duration'],
-                                     line['description'],
-                                     line['project_name'],
-                                     line['client_name']))
-                cnx.commit()
-            except mysql.connector.Error as e:
-                return(return_messages.append("Fail during ADDING ROWS to table toggl_time_entries"))
-                return_messages.append("Error code:" + str(e.errno))
-                return_messages.append("SQLSTATE value:" + str(e.sqlstate))
-                return_messages.append("Error message:" + str(e.msg))
-                return_messages.append("Error:" + str(e))
+    sql = "INSERT INTO `working_days` (`id`, `days`, `type`, `working_hours`) VALUES (%s, %s, %s, %s)"
+    for index, line in working_days_df.iterrows():
+        try:
+            cursor.execute(sql, (index,
+                                 line['days'],
+                                 line['type'],
+                                 line['working_hours']))
+            cnx.commit()
+        except:
+            return(return_messages.append("Fail during ADDING ROWS to table working_days"))
+            return_messages.append("Error code:" + str(e.errno))
+            return_messages.append("SQLSTATE value:" + str(e.sqlstate))
+            return_messages.append("Error message:" + str(e.msg))
+            return_messages.append("Error:" + str(e))
 
     return return_messages
 
