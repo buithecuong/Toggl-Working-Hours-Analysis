@@ -1,6 +1,6 @@
 # Working hours analysis
 
-> Collects your Toggl time tracking events to enhance your working time analysis with python
+> Collects Toggl time tracking events and uses them to analyse the time you are working for different projects and clients
 
 Since I am using Toggl Track (https://toggl.com/track/) for tracking the time I am working on privat and work related projects, the time records became much more accurate, what
 helps me to evaluate my own work and productivity.
