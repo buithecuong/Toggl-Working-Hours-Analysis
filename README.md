@@ -6,7 +6,7 @@ Since I am using Toggl Track (https://toggl.com/track/) for tracking the time I 
 helps me to evaluate my own work and productivity.
 
 To perform analyses and create customized visualisations with python and Grafana, I used the Toggl API to collect the data. For calculating
-the target hours I have to work each week and month I am also stored the information to vacation days in config.py and pulled the data to puplic
+the target hours I have to work each week and month I stored the information to my own vacation days in config.py and pulled the data to puplic
 holidays from suitable web pages.
 
 
