@@ -2,7 +2,7 @@
 
 > Collects your Toggl time tracking events to enhance your working time analysis with python
 
-Since I am using Toggl for time tracking the time records became much more accurate and
+Since I am using Toggl Track (https://toggl.com/track/) for tracking the time I am working on privat and work related projects, the time records became much more accurate, what
 helps me to evaluate my own work and productivity.
 
 To perform analyses and create customized visualisations with python and Grafana, I used the Toggl API to collect the data. For calculating
