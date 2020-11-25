@@ -1,6 +1,6 @@
-# Time Tracking Analysis
+# Working hours analysis
 
-> Python script to enhance you Toggl time tracking analyses
+> Collects your Toggl time tracking events to enhance your working time analysis with python
 
 Since I am using Toggl for time tracking the time records became much more accurate and
 helps me to evaluate my own work and productivity.
