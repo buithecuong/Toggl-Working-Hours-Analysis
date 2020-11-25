@@ -5,9 +5,9 @@
 Since I am using Toggl for time tracking the time records became much more accurate and
 helps me to evaluate my own work and productivity.
 
-To perform analyses and create customized visualisations, I began to retrieve the data from Toggl. To calculate
-the hours I have to work each week and month I am also collecting information to vacation days, puplic holidays and
-weekends.
+To perform analyses and create customized visualisations with python and Grafana, I used the Toggl API to collect the data. For calculating
+the target hours I have to work each week and month I am also stored the information to vacation days in config.py and pulled the data to puplic
+holidays from suitable web pages.
 
 
 # Toggl
