@@ -1,4 +1,4 @@
-# Working hours analysis
+# Working hours analysis with Toggl, Python and Grafana
 
 > Collects Toggl time tracking events and uses them to analyse the time you are working for different projects and clients
 
