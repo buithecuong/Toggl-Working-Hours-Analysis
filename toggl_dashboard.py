@@ -2,12 +2,10 @@ from helper_functions import connect_to_database, connect_to_toggl, \
     get_all_clients_and_projects, get_all_time_entries, data_processing, \
     define_working_days_table, write_toggl_data_in_database, \
     write_working_days_list
-import os
-import config
+from time_tracking_dashboard.time_tracking_dashboard import config
 from datetime import datetime
 import pandas as pd
 import sys
-import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
@@ -28,7 +26,6 @@ def collect_data_from_toggl():
 
     time_entries_extended_df = get_all_time_entries(headers, start_date=str(config.start_date_time_tracking),
                                                     end_date=str(config.end_date_time_tracking))
-
     #process the information
     time_entries_extended_df = data_processing(clients, projects, time_entries_extended_df)
 

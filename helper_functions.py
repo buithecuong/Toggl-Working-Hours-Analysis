@@ -6,7 +6,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
-import config
+from time_tracking_dashboard.time_tracking_dashboard import config
+
 
 def connect_to_database(password, database, user, port, host):
     '''Connects to mysql database'''
@@ -33,7 +34,6 @@ def connect_to_toggl(api_token):
 
     response = requests.get(url, headers=headers)
     response = response.json()
-
     email = response['data']['email']
     workspaces = [{'name': item['name'], 'id': item['id']} for item in response['data']['workspaces'] if
                   item['admin'] == True]
@@ -58,7 +58,6 @@ def get_all_time_entries(headers, start_date, end_date):
 
     url = 'https://api.track.toggl.com/api/v8/time_entries?start_date=' + start_date + 'T15%3A42%3A46%2B02%3A00&end_date=' + end_date + 'T15%3A42%3A46%2B02%3A00'
     time_entries = requests.get(url, headers=headers).json()
-
     return time_entries
 
 def data_processing(clients,projects,time_entries):
