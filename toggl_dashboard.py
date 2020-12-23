@@ -106,6 +106,7 @@ over_hours =round((worked_hours - target_hours),1)
 
 ax.set(xlabel='Calendar week', ylabel='Hours',
        title=f'Working hours (total overhours: {over_hours})')
-ax.xticks(rotation=45)
+
 ax.legend(title="Clients")
+plt.xticks(rotation=45)
 plt.show()
