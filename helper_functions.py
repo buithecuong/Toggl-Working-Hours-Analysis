@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
-from time_tracking_dashboard.time_tracking_dashboard import config
+import config
 
 
 def connect_to_database(password, database, user, port, host):

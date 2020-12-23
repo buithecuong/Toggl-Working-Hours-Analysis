@@ -2,7 +2,7 @@ from helper_functions import connect_to_database, connect_to_toggl, \
     get_all_clients_and_projects, get_all_time_entries, data_processing, \
     define_working_days_table, write_toggl_data_in_database, \
     write_working_days_list
-from time_tracking_dashboard.time_tracking_dashboard import config
+import config
 from datetime import datetime
 import pandas as pd
 import sys
@@ -106,6 +106,6 @@ over_hours =round((worked_hours - target_hours),1)
 
 ax.set(xlabel='Calendar week', ylabel='Hours',
        title=f'Working hours (total overhours: {over_hours})')
-
+ax.xticks(rotation=45)
 ax.legend(title="Clients")
 plt.show()
