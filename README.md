@@ -7,8 +7,4 @@ helps me to evaluate my own work and productivity.
 
 To perform analyses and create customized visualizations with Python and Matplotlib, the script collects the tracked working hours via Toggl API. To calculate the target working hours for each week and month, it's necessary to know which day is a working day. Therefor the information about my vacation days is stored in config.py and the public holidays get pulled from suitable web pages.
 
-<<<<<<< HEAD
-<img src="./img/matplotlib.PNG" width="
-=======
 <img src="./img/matplotlib.PNG" width="1000">
->>>>>>> 5a279710fc5f3841c0c4be2278a4044969fce6fa
