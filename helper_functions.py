@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import re
 from datetime import datetime
 import config
-
+from urllib.parse import urlencode
 
 def connect_to_database(password, database, user, port, host):
     '''Connects to mysql database'''
@@ -56,7 +56,13 @@ def get_all_clients_and_projects(my_workspace, headers):
 def get_all_time_entries(headers, start_date, end_date):
     '''Finds all time entries in the time frame [start_date - end_date]'''
 
-    url = 'https://api.track.toggl.com/api/v8/time_entries?start_date=' + start_date + 'T15%3A42%3A46%2B02%3A00&end_date=' + end_date + 'T15%3A42%3A46%2B02%3A00'
+    start_date = str(start_date) + 'T00:00:00+01:00'
+    end_date = str(end_date.strftime("%Y-%m-%d")) + 'T00:00:00+01:00'
+
+    url = 'https://api.track.toggl.com/api/v8/time_entries?'
+    params = {'start_date': start_date, 'end_date': end_date}
+    url = url + '{}'.format(urlencode(params))
+
     time_entries = requests.get(url, headers=headers).json()
     return time_entries
 
@@ -80,7 +86,7 @@ def data_processing(clients,projects,time_entries):
 
     return time_entries_extended_df
 
-def define_working_days_table(start_date = config.start_date_time_tracking, end_date = date.today()):
+def define_working_days_table(start_date, end_date):
     """
     :return:    Returns a data frame with all days in the defined time frame (start_date - end_date)
                 The data frame has two columns: days and type
