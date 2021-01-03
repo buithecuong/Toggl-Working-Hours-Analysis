@@ -1,6 +1,6 @@
 import mysql.connector
 import base64
-from datetime import date, timedelta
+from datetime import date, timedelta, timezone
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -56,8 +56,8 @@ def get_all_clients_and_projects(my_workspace, headers):
 def get_all_time_entries(headers, start_date, end_date):
     '''Finds all time entries in the time frame [start_date - end_date]'''
 
-    start_date = str(start_date) + 'T00:00:00+01:00'
-    end_date = str(end_date.strftime("%Y-%m-%d")) + 'T00:00:00+01:00'
+    start_date = start_date.replace(tzinfo=timezone.utc).isoformat()
+    end_date = end_date.replace(tzinfo=timezone.utc).isoformat()
 
     url = 'https://api.track.toggl.com/api/v8/time_entries?'
     params = {'start_date': start_date, 'end_date': end_date}
@@ -94,14 +94,14 @@ def define_working_days_table(start_date, end_date):
                 :Type: the information if the day is a
                         - working day (WD)
                         - vacation day (paid time off - PTO)
-                        - puplic holiday (PH)
+                        - public holiday (PH)
                         - weekend (WE) - saturday and sunday
     """
-    def web_scraper_puplic_holidays():
+    def web_scraper_public_holidays():
         '''
         The following code retrieves the source code from https://www.ferienwiki.de/feiertage/de/bayern and
-        saves the german (bavarian) puplic holidays in a MySQL database.
-        :return:puplic_holidays_df: (data frame with a entry for each puplic holiday
+        saves the german (bavarian) public holidays in a MySQL database.
+        :return:public_holidays_df: (data frame with a entry for each public holiday
                                     in bavaria)
         '''
         url = 'https://www.ferienwiki.de/feiertage/de/bayern'
@@ -110,21 +110,21 @@ def define_working_days_table(start_date, end_date):
         soup = BeautifulSoup(response.text, 'html.parser')
         td = soup.findAll('td')
 
-        puplic_holidays = []
+        public_holidays = []
 
         for line in td:
             try:
                 match = re.search(r'\d{2}.\d{2}.\d{4}', str(line))
                 date = datetime.strptime(match.group(), '%d.%m.%Y').date()
-                puplic_holidays.append(date)
+                public_holidays.append(date)
             except:
                 pass
 
-        puplic_holidays_df = pd.DataFrame(data=puplic_holidays)
-        puplic_holidays_df = puplic_holidays_df.rename(columns={0: "days"})
-        return puplic_holidays
+        public_holidays_df = pd.DataFrame(data=public_holidays)
+        public_holidays_df = public_holidays_df.rename(columns={0: "days"})
+        return public_holidays
 
-    puplic_holidays = web_scraper_puplic_holidays()
+    public_holidays = web_scraper_public_holidays()
 
     all_days = []
     for n in range(int((end_date - start_date).days)):
@@ -141,7 +141,7 @@ def define_working_days_table(start_date, end_date):
 
     all_days_we_ph = []
     for item in all_days_we:
-        if item['days'] in puplic_holidays:
+        if item['days'] in public_holidays:
             all_days_we_ph.append({'days': item['days'], 'type': "PH"})
         else:
             all_days_we_ph.append({'days': item['days'], 'type': item['type']})
@@ -155,8 +155,8 @@ def define_working_days_table(start_date, end_date):
 
     print(f"Number of days between start and end date: {len(all_days_we_ph_pto)}")
     print(f"Number of weekend days between start and end date: {len([1 for item in all_days_we_ph_pto if item['type'] == 'WE'])}")
-    print(f"Number of puplic holidays between start and end date (minus puplic holidays): {len([1 for item in all_days_we_ph_pto if item['type'] == 'PH'])}")
-    print(f"Number of vacation days between start and end date (minus puplic holidays and vacation days): {len([1 for item in all_days_we_ph_pto if item['type'] == 'PTO'])}")
+    print(f"Number of public holidays between start and end date (minus public holidays): {len([1 for item in all_days_we_ph_pto if item['type'] == 'PH'])}")
+    print(f"Number of vacation days between start and end date (minus public holidays and vacation days): {len([1 for item in all_days_we_ph_pto if item['type'] == 'PTO'])}")
 
     working_days = []
     for item in all_days_we_ph_pto:

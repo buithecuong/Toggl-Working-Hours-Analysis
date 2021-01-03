@@ -2,7 +2,7 @@
 
 > Collects Toggl time tracking events and uses them to analyze the time you are working for different projects and clients
 
-<img src="./img/matplotlib.PNG" width="1000">
+<img src="./img/title.png" width="1000">
 
 Toggl Track is a time tracker that allows you to track and manage your time in the easiest way possible. Installed on your computer, Toggl reminds you to record your time, which gives me a much more accurate and stress-free record of my working time.
 
@@ -12,8 +12,8 @@ To perform analysis and create visualizations for my personal needs, I began to 
 
 ## Data sources:
 
-Toggl API: Tracked time data
-Web Scraper: Public holidays
-Config.py: Personal data e.g. vacation days
+* Toggl API: Tracked time data
+* Web Scraper: Public holidays
+* Config.py: Personal data e.g. vacation days
 
-<img src="./img/matplotlib.PNG" width="1000">
+<img src="./img/data_sources.PNG" width="1000">

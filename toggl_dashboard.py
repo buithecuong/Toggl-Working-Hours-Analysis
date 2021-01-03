@@ -77,11 +77,11 @@ def sum_worked_hours_by_week(time_entries_extended_df):
 
 
 #calculate worked hours for a certain client
-time_entries_sum_per_week_df = sum_worked_hours_by_week(
+time_entries_sum_only_DI_df = sum_worked_hours_by_week(
     time_entries_extended_df[time_entries_extended_df.client_name == "DI"]
 )
 
-worked_hours = time_entries_sum_per_week_df["duration_hours"].sum()
+worked_hours = time_entries_sum_only_DI_df["duration_hours"].sum()
 target_hours = working_days_sum_by_week_df["working_hours"].sum()
 over_hours =round((worked_hours - target_hours),1)
 
@@ -99,6 +99,8 @@ for i, client in enumerate(time_entries_extended_df.client_name.unique()):
 
 ax.set(xlabel='Calendar week', ylabel='Hours',
        title=f'Working hours (total overhours: {over_hours})')
+
+
 
 ax.legend(title="Clients")
 plt.xticks(rotation=45)
