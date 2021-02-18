@@ -16,4 +16,4 @@ To perform analysis and create visualizations for my personal needs, I began to 
 * Web Scraper: Public holidays
 * Config.py: Personal data e.g. vacation days
 
-<img src="./img/data_sources.PNG" width="1000">
+<img src="./img/data_sources.png" width="1000">
