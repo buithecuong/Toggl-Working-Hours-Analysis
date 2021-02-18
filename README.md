@@ -1,4 +1,4 @@
-# Work time analysis with Toggl and Python
+﻿# Work time analysis with Toggl and Python
 
 > Collects Toggl time tracking events and uses them to analyze the time you are working for different projects and clients
 
@@ -16,8 +16,4 @@ To perform analysis and create visualizations for my personal needs, I began to 
 * Web Scraper: Public holidays
 * Config.py: Personal data e.g. vacation days
 
-<<<<<<< HEAD
-<img src="./img/data_sources.png" width="1000">
-=======
 <img src="./img/data_sources.png" width="800">
->>>>>>> eeb94773bced1541f383bcf4466c5b84a787ecc3
