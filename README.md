@@ -1,6 +1,6 @@
 # Working time analysis
 
-<img src="./img/title2.png" width="800">
+<img src="./img/title.png" width="800">
 
 Collects Toggl time tracking events and uses them to analyze the time you are working for different projects and clients
 
