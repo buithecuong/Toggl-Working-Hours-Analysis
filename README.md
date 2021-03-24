@@ -8,9 +8,5 @@ Collects Toggl time tracking events and uses them to analyze the time you are wo
 
 * Python 
 
-### Installation
-
-1. Install reuqirements
-
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
