@@ -288,3 +288,12 @@ def write_working_days_list(cursor, cnx, working_days_df):
 
     return return_messages
 
+def send_results_per_email():
+    # import the smtplib module. It should be included in Python by default
+    import smtplib
+    # set up the SMTP server
+    s = smtplib.SMTP(host='your_host_address_here', port=your_port_here)
+    s.starttls()
+    s.login(MY_ADDRESS, PASSWORD)
+
+    s = smtplib.SMTP(host='smtp-mail.outlook.com', port=587)

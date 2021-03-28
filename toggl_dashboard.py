@@ -3,12 +3,15 @@ from helper_functions import connect_to_database, connect_to_toggl, \
     define_working_days_table, write_toggl_data_in_database, \
     write_working_days_list
 import config
-from datetime import datetime
+from datetime import datetime, date
 import pandas as pd
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
+import os
+import smtplib
+import matplotlib.pyplot as plt
 
 '''
 Collects the data from config.py and your Toggl acc and calculates worked hours and overtime
@@ -30,7 +33,7 @@ def collect_data_from_toggl():
     return time_entries_extended_df
 
 time_entries_extended_df = collect_data_from_toggl()
-#drop row where stop isnt defined yet
+#drop row where stop isnt defined yet (if time event is still running)
 time_entries_extended_df = time_entries_extended_df[time_entries_extended_df.duration > 0]
 
 working_days_df = define_working_days_table(config.start_date, config.end_date)
@@ -75,33 +78,77 @@ def sum_worked_hours_by_week(time_entries_extended_df):
 
     return time_entries_sum_per_week_df
 
+def create_visualization():
+    '''
+    Calculates hours worked per calendar week
+    :return: Saves Matplotlib Visualization in ./results
+    '''
 
-#calculate worked hours for a certain client
-time_entries_sum_only_DI_df = sum_worked_hours_by_week(
-    time_entries_extended_df[time_entries_extended_df.client_name == "DI"]
-)
-
-worked_hours = time_entries_sum_only_DI_df["duration_hours"].sum()
-target_hours = working_days_sum_by_week_df["working_hours"].sum()
-over_hours =round((worked_hours - target_hours),1)
-
-#plot diagram with matplotlib
-fig, ax = plt.subplots(figsize=(15, 7))
-ax.bar(working_days_sum_by_week_df.index.tolist(), working_days_sum_by_week_df["working_hours"].tolist(), width=0.35, label="Target working hours", color="grey")
-
-for i, client in enumerate(time_entries_extended_df.client_name.unique()):
-    time_entries_sum_per_week_df = sum_worked_hours_by_week(
-        time_entries_extended_df[time_entries_extended_df.client_name == client]
+    #calculate worked hours for a certain client
+    time_entries_sum_only_DI_df = sum_worked_hours_by_week(
+        time_entries_extended_df[time_entries_extended_df.client_name == "DI"]
     )
 
-    bar = ax.plot(time_entries_sum_per_week_df.index.tolist(), time_entries_sum_per_week_df["duration_hours"].tolist(),
-                  "-o", label=client)
+    worked_hours = time_entries_sum_only_DI_df["duration_hours"].sum()
+    target_hours = working_days_sum_by_week_df["working_hours"].sum()
+    over_hours =round((worked_hours - target_hours),1)
 
-ax.set(xlabel='Calendar week', ylabel='Hours',
-       title=f'Working hours (total overhours: {over_hours})')
+    #plot diagram with matplotlib
+    fig, ax = plt.subplots(figsize=(15, 7))
+    ax.bar(working_days_sum_by_week_df.index.tolist(), working_days_sum_by_week_df["working_hours"].tolist(), width=0.35, label="Target working hours", color="grey")
 
+    for i, client in enumerate(time_entries_extended_df.client_name.unique()):
+        time_entries_sum_per_week_df = sum_worked_hours_by_week(
+            time_entries_extended_df[time_entries_extended_df.client_name == client]
+        )
 
+        bar = ax.plot(time_entries_sum_per_week_df.index.tolist(), time_entries_sum_per_week_df["duration_hours"].tolist(),
+                      "-o", label=client)
 
-ax.legend(title="Clients")
-plt.xticks(rotation=45)
-plt.show()
+    ax.set(xlabel='Calendar week', ylabel='Hours',
+           title=f'Working hours (total overhours: {over_hours})')
+
+    ax.legend(title="Clients")
+    plt.xticks(rotation=45)
+    # plt.show()
+
+    # filename = current date (e.g.
+    filename = str(date.today())
+    dir = r"./results/"
+
+    fig.savefig(dir + filename)
+
+create_visualization()
+
+def send_email_with_results():
+    g_secret = os.environ['G-PW']
+    mail1 = os.environ['MAIL1']
+    mail2 = os.environ['MAIL2']
+
+    gmail_user = mail1
+    gmail_password = g_secret
+
+    sent_from = gmail_user
+    to = [mail1, mail2]
+    subject = 'Subject'
+    body = 'test'
+
+    email_text = """\
+    From: %s
+    To: %s
+    Subject: %s
+    
+    %s
+    """ % (sent_from, ", ".join(to), subject, body)
+
+    try:
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        server.ehlo()
+        server.login(gmail_user, gmail_password)
+        server.sendmail(sent_from, to, email_text)
+        server.close()
+
+        print('Email sent!')
+    except:
+        print('Something went wrong...')
+
