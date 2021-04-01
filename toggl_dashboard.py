@@ -6,12 +6,14 @@ import config
 from datetime import datetime, date
 import pandas as pd
 import sys
-import matplotlib.pyplot as plt
 import numpy as np
 import copy
 import os
 import smtplib
 import matplotlib.pyplot as plt
+
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 
 '''
 Collects the data from config.py and your Toggl acc and calculates worked hours and overtime
@@ -78,77 +80,126 @@ def sum_worked_hours_by_week(time_entries_extended_df):
 
     return time_entries_sum_per_week_df
 
-def create_visualization():
-    '''
-    Calculates hours worked per calendar week
-    :return: Saves Matplotlib Visualization in ./results
-    '''
+'''
+Calculates hours worked per calendar week
+:return: Saves Matplotlib Visualization in ./results
+'''
 
-    #calculate worked hours for a certain client
-    time_entries_sum_only_DI_df = sum_worked_hours_by_week(
-        time_entries_extended_df[time_entries_extended_df.client_name == "DI"]
+#calculate worked hours for a certain client
+time_entries_sum_only_DI_df = sum_worked_hours_by_week(
+    time_entries_extended_df[time_entries_extended_df.client_name == "DI"]
+)
+
+worked_hours = time_entries_sum_only_DI_df["duration_hours"].sum()
+target_hours = working_days_sum_by_week_df["working_hours"].sum()
+over_hours =round((worked_hours - target_hours),1)
+
+#plot diagram with matplotlib
+fig, ax = plt.subplots(figsize=(15, 7))
+x_target = working_days_sum_by_week_df.index.tolist()
+y_target = working_days_sum_by_week_df["working_hours"].tolist()
+
+ax.bar(range(len(x_target)), y_target, width=0.35, label="Target working hours", color="grey")
+
+for i, client in enumerate(time_entries_extended_df.client_name.unique()):
+    time_entries_sum_per_week_df = sum_worked_hours_by_week(
+        time_entries_extended_df[time_entries_extended_df.client_name == client]
     )
 
-    worked_hours = time_entries_sum_only_DI_df["duration_hours"].sum()
-    target_hours = working_days_sum_by_week_df["working_hours"].sum()
-    over_hours =round((worked_hours - target_hours),1)
+    x_actual = time_entries_sum_per_week_df.index.tolist()
+    y_actual = time_entries_sum_per_week_df["duration_hours"].tolist()
 
-    #plot diagram with matplotlib
-    fig, ax = plt.subplots(figsize=(15, 7))
-    ax.bar(working_days_sum_by_week_df.index.tolist(), working_days_sum_by_week_df["working_hours"].tolist(), width=0.35, label="Target working hours", color="grey")
+    bar = ax.plot(range(len(x_actual)), y_actual, "-o", label=client)
 
-    for i, client in enumerate(time_entries_extended_df.client_name.unique()):
-        time_entries_sum_per_week_df = sum_worked_hours_by_week(
-            time_entries_extended_df[time_entries_extended_df.client_name == client]
-        )
+ax.set(xlabel='Calendar week', ylabel='Hours',
+       title=f'Working hours (total overhours: {over_hours})')
 
-        bar = ax.plot(time_entries_sum_per_week_df.index.tolist(), time_entries_sum_per_week_df["duration_hours"].tolist(),
-                      "-o", label=client)
+ax.legend(title="Clients")
+plt.xticks(range(len(x_target)), x_target, size='small')
+plt.xticks(rotation=45)
+# plt.show()
+# filename = current date (e.g.
+filename = str(date.today()) + ".png"
+dir = r"./results/"
+path = dir + filename
+fig.savefig(path, dpi=fig.dpi)
 
-    ax.set(xlabel='Calendar week', ylabel='Hours',
-           title=f'Working hours (total overhours: {over_hours})')
+'''
+    Send results via email
+'''
 
-    ax.legend(title="Clients")
-    plt.xticks(rotation=45)
-    # plt.show()
+g_secret = os.environ['G-PW']
+mail1 = os.environ['MAIL1']
+mail2 = os.environ['MAIL2']
 
-    # filename = current date (e.g.
-    filename = str(date.today())
-    dir = r"./results/"
+gmail_user = mail1
+gmail_password = g_secret
 
-    fig.savefig(dir + filename)
+# sent_from = gmail_user
+# to = [mail1, mail2]
+# subject = 'Subject'
+# body = 'test'
+#
+# email_text = """\
+# From: %s
+# To: %s
+# Subject: %s
+#
+# %s
+# """ % (sent_from, ", ".join(to), subject, body)
+#
+# fp = open(path, 'rb')
+# img = MIMEImage(fp.read())
+# fp.close()
+# email_text.attach(img)
+#
+# try:
+#     server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+#     server.ehlo()
+#     server.login(gmail_user, gmail_password)
+#     server.sendmail(sent_from, to, email_text)
+#     server.close()
+#
+#     print('Email sent!')
+# except:
+#     print('Something went wrong...')
 
-create_visualization()
+COMMASPACE = ', '
 
-def send_email_with_results():
-    g_secret = os.environ['G-PW']
-    mail1 = os.environ['MAIL1']
-    mail2 = os.environ['MAIL2']
+g_secret = os.environ['G-PW']
+mail1 = os.environ['MAIL1']
+mail2 = os.environ['MAIL2']
 
-    gmail_user = mail1
-    gmail_password = g_secret
+gmail_user = mail1
+gmail_password = g_secret
 
-    sent_from = gmail_user
-    to = [mail1, mail2]
-    subject = 'Subject'
-    body = 'test'
+# Create the container (outer) email message.
+msg = MIMEMultipart()
+msg['Subject'] = 'Our family reunion'
+# me == the sender's email address
+# family = the list of all recipients' email addresses
+msg['From'] = gmail_user
+msg['To'] = COMMASPACE.join([mail1, mail2])
+msg.preamble = 'Our family reunion'
 
-    email_text = """\
-    From: %s
-    To: %s
-    Subject: %s
-    
-    %s
-    """ % (sent_from, ", ".join(to), subject, body)
+# Assume we know that the image files are all in PNG format
+# for file in pngfiles:
+# Open the files in binary mode.  Let the MIMEImage class automatically
+# guess the specific image type.
+fp = open(path, 'rb')
+img = MIMEImage(fp.read())
+fp.close()
+msg.attach(img)
 
-    try:
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        server.ehlo()
-        server.login(gmail_user, gmail_password)
-        server.sendmail(sent_from, to, email_text)
-        server.close()
+# Send the email via our own SMTP server.
 
-        print('Email sent!')
-    except:
-        print('Something went wrong...')
+server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+server.ehlo()
+server.login(gmail_user, gmail_password)
+# server.sendmail(sent_from, to, email_text)
+# server.close()
+#
+# s = smtplib.SMTP('localhost')
+server.sendmail(gmail_user, [mail1, mail2], msg.as_string())
+server.quit()
 
