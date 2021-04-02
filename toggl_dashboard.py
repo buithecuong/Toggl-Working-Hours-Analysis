@@ -5,7 +5,6 @@ from helper_functions import connect_to_database, connect_to_toggl, \
 import config
 from datetime import datetime, date
 import pandas as pd
-import sys
 import numpy as np
 import copy
 import os
