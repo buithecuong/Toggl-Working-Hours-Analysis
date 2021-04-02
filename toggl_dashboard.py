@@ -82,7 +82,6 @@ def sum_worked_hours_by_week(time_entries_extended_df):
 
 '''
 Calculates hours worked per calendar week
-:return: Saves Matplotlib Visualization in ./results
 '''
 
 #calculate worked hours for a certain client
@@ -127,43 +126,6 @@ fig.savefig(path, dpi=fig.dpi)
 '''
     Send results via email
 '''
-
-g_secret = os.environ['G-PW']
-mail1 = os.environ['MAIL1']
-mail2 = os.environ['MAIL2']
-
-gmail_user = mail1
-gmail_password = g_secret
-
-# sent_from = gmail_user
-# to = [mail1, mail2]
-# subject = 'Subject'
-# body = 'test'
-#
-# email_text = """\
-# From: %s
-# To: %s
-# Subject: %s
-#
-# %s
-# """ % (sent_from, ", ".join(to), subject, body)
-#
-# fp = open(path, 'rb')
-# img = MIMEImage(fp.read())
-# fp.close()
-# email_text.attach(img)
-#
-# try:
-#     server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-#     server.ehlo()
-#     server.login(gmail_user, gmail_password)
-#     server.sendmail(sent_from, to, email_text)
-#     server.close()
-#
-#     print('Email sent!')
-# except:
-#     print('Something went wrong...')
-
 COMMASPACE = ', '
 
 g_secret = os.environ['G-PW']
@@ -175,15 +137,11 @@ gmail_password = g_secret
 
 # Create the container (outer) email message.
 msg = MIMEMultipart()
-msg['Subject'] = 'Our family reunion'
-# me == the sender's email address
-# family = the list of all recipients' email addresses
+msg['Subject'] = 'Working Hours Calc'
 msg['From'] = gmail_user
 msg['To'] = COMMASPACE.join([mail1, mail2])
-msg.preamble = 'Our family reunion'
+msg.preamble = 'Working Hours Calc'
 
-# Assume we know that the image files are all in PNG format
-# for file in pngfiles:
 # Open the files in binary mode.  Let the MIMEImage class automatically
 # guess the specific image type.
 fp = open(path, 'rb')
@@ -191,15 +149,11 @@ img = MIMEImage(fp.read())
 fp.close()
 msg.attach(img)
 
-# Send the email via our own SMTP server.
-
+# Send the email via our own SMTP server
 server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
 server.ehlo()
 server.login(gmail_user, gmail_password)
-# server.sendmail(sent_from, to, email_text)
-# server.close()
-#
-# s = smtplib.SMTP('localhost')
+
 server.sendmail(gmail_user, [mail1, mail2], msg.as_string())
 server.quit()
 
