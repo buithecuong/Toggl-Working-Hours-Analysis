@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
+import pathlib
+
 '''
 Collects the data from config.py and your Toggl acc and calculates worked hours and overtime
 '''
@@ -118,8 +120,10 @@ plt.xticks(rotation=45)
 # plt.show()
 # filename = current date (e.g.
 filename = str(date.today()) + ".png"
-dir = r"./results/"
-path = dir + filename
+
+dir = pathlib.Path(__file__).parent.absolute()
+folder = r"/results/"
+path = str(dir) + folder + filename
 fig.savefig(path, dpi=fig.dpi)
 
 '''
