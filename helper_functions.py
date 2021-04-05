@@ -86,6 +86,36 @@ def data_processing(clients,projects,time_entries):
 
     return time_entries_extended_df
 
+def query_public_holidays_from_db():
+    '''
+    Queries data from table public_holidays and saves them in a data frame
+    :return: public_holidays_df
+    '''
+
+    cnx = mysql.connector.connect(
+                host="dashboardserver.germanywestcentral.cloudapp.azure.com",
+                user=config.mysql["user"],
+                password=config.mysql["password"],
+                port=config.mysql["port"],
+    )
+
+
+    mycursor = cnx.cursor()
+
+    mycursor.execute("SELECT date FROM calc_working_hours.public_holidays;")
+
+    myresult = mycursor.fetchall()
+
+    public_holidays = []
+
+    for x in myresult:
+        public_holidays.append(x[0])
+
+    # public_holidays_df = pd.DataFrame(data=public_holidays)
+    # public_holidays_df = public_holidays_df.rename(columns={0: "days"})
+
+    return public_holidays
+
 def define_working_days_table(start_date, end_date):
     """
     :return:    Returns a data frame with all days in the defined time frame (start_date - end_date)
@@ -97,34 +127,8 @@ def define_working_days_table(start_date, end_date):
                         - public holiday (PH)
                         - weekend (WE) - saturday and sunday
     """
-    def web_scraper_public_holidays():
-        '''
-        The following code retrieves the source code from https://www.ferienwiki.de/feiertage/de/bayern and
-        saves the german (bavarian) public holidays in a MySQL database.
-        :return:public_holidays_df: (data frame with a entry for each public holiday
-                                    in bavaria)
-        '''
-        url = 'https://www.ferienwiki.de/feiertage/de/bayern'
-        response = requests.get(url)
 
-        soup = BeautifulSoup(response.text, 'html.parser')
-        td = soup.findAll('td')
-
-        public_holidays = []
-
-        for line in td:
-            try:
-                match = re.search(r'\d{2}.\d{2}.\d{4}', str(line))
-                date = datetime.strptime(match.group(), '%d.%m.%Y').date()
-                public_holidays.append(date)
-            except:
-                pass
-
-        public_holidays_df = pd.DataFrame(data=public_holidays)
-        public_holidays_df = public_holidays_df.rename(columns={0: "days"})
-        return public_holidays
-
-    public_holidays = web_scraper_public_holidays()
+    public_holidays = query_public_holidays_from_db()
 
     all_days = []
     for n in range(int((end_date - start_date).days)):
