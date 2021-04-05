@@ -88,7 +88,7 @@ def data_processing(clients,projects,time_entries):
 
 def query_public_holidays_from_db():
     '''
-    Queries data from table public_holidays and saves them in a data frame
+    Queries data from table public_holidays and saves them in a list
     :return: public_holidays_df
     '''
 
@@ -116,6 +116,32 @@ def query_public_holidays_from_db():
 
     return public_holidays
 
+def query_vacation_days_from_db():
+    '''
+    Queries data from table vacation_days and saves them in a list
+    :return: vacation_days
+    '''
+
+    cnx = mysql.connector.connect(
+                host="dashboardserver.germanywestcentral.cloudapp.azure.com",
+                user=config.mysql["user"],
+                password=config.mysql["password"],
+                port=config.mysql["port"],
+    )
+
+    mycursor = cnx.cursor()
+
+    mycursor.execute("SELECT date FROM calc_working_hours.vacation_days;")
+
+    myresult = mycursor.fetchall()
+
+    vacation_days = []
+
+    for x in myresult:
+        vacation_days.append(x[0])
+
+    return vacation_days
+
 def define_working_days_table(start_date, end_date):
     """
     :return:    Returns a data frame with all days in the defined time frame (start_date - end_date)
@@ -129,6 +155,7 @@ def define_working_days_table(start_date, end_date):
     """
 
     public_holidays = query_public_holidays_from_db()
+    vacation_days = query_vacation_days_from_db()
 
     all_days = []
     for n in range(int((end_date - start_date).days)):
@@ -150,9 +177,10 @@ def define_working_days_table(start_date, end_date):
         else:
             all_days_we_ph.append({'days': item['days'], 'type': item['type']})
 
+
     all_days_we_ph_pto = []
     for item in all_days_we_ph:
-        if item['days'] in config.vacation_days:
+        if item['days'] in vacation_days:
             all_days_we_ph_pto.append({'days': item['days'], 'type': "PTO"})
         else:
             all_days_we_ph_pto.append({'days': item['days'], 'type': item['type']})
@@ -171,10 +199,6 @@ def define_working_days_table(start_date, end_date):
 
     working_days_df = pd.DataFrame(data=working_days)
     return working_days_df
-
-def input_vacation_days():
-    pass
-
 
 def write_toggl_data_in_database(cursor, cnx, time_entries_extended):
     return_messages=[]
