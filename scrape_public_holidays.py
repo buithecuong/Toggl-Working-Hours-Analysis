@@ -42,7 +42,7 @@ public_holidays_df = public_holidays_df.rename(columns={0: "date"})
 #                               host=config.mysql["host"])
 
 cnx = mysql.connector.connect(
-            host="dashboardserver.germanywestcentral.cloudapp.azure.com",
+            host=config.mysql["host"],
             user=config.mysql["user"],
             password=config.mysql["password"],
             port=config.mysql["port"],

@@ -8,6 +8,7 @@ import re
 from datetime import datetime
 import config
 from urllib.parse import urlencode
+import os
 
 def connect_to_database(password, database, user, port, host):
     '''Connects to mysql database'''
@@ -93,7 +94,7 @@ def query_public_holidays_from_db():
     '''
 
     cnx = mysql.connector.connect(
-                host="dashboardserver.germanywestcentral.cloudapp.azure.com",
+                host=config.mysql["host"],
                 user=config.mysql["user"],
                 password=config.mysql["password"],
                 port=config.mysql["port"],
@@ -123,7 +124,7 @@ def query_vacation_days_from_db():
     '''
 
     cnx = mysql.connector.connect(
-                host="dashboardserver.germanywestcentral.cloudapp.azure.com",
+                host=config.mysql["host"],
                 user=config.mysql["user"],
                 password=config.mysql["password"],
                 port=config.mysql["port"],
@@ -131,7 +132,7 @@ def query_vacation_days_from_db():
 
     mycursor = cnx.cursor()
 
-    mycursor.execute("SELECT date FROM calc_working_hours.vacation_days;")
+    mycursor.execute("SELECT days FROM calc_working_hours.vacation_days;")
 
     myresult = mycursor.fetchall()
 

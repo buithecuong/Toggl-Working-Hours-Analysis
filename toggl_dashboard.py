@@ -49,8 +49,11 @@ def write_tables_to_mysql(time_entries_extended, working_days_df):
     '''write the collected and processed data to tables in the MySQL database'''
 
     try:
-        cnx, cursor = connect_to_database(password=config.mysql["user"], database=config.mysql["database"],
-                                          user=config.mysql["user"], port=config.mysql["port"], host=config.mysql["host"])
+        cnx, cursor = connect_to_database(password=config.mysql["user"],
+                                          database=config.mysql["database"],
+                                          user=config.mysql["user"],
+                                          port=config.mysql["port"],
+                                          host=config.mysql["host"])
 
         return_messages_time_entries = write_toggl_data_in_database(cursor, cnx, time_entries_extended)
         for item in return_messages_time_entries:
