@@ -102,7 +102,9 @@ fig, ax = plt.subplots(figsize=(15, 7))
 x_target = working_days_sum_by_week_df.index.tolist()
 y_target = working_days_sum_by_week_df["working_hours"].tolist()
 
-ax.bar(range(len(x_target)), y_target, width=0.35, label="Target working hours", color="grey")
+#ax.bar(range(len(x_target)), y_target, width=0.35, label="Target working hours", color="grey")
+ax.bar([item.replace("-","") for item in x_target], y_target, width=0.35, label="Target working hours", color="grey")
+
 
 for i, client in enumerate(time_entries_extended_df.client_name.unique()):
     time_entries_sum_per_week_df = sum_worked_hours_by_week(
@@ -112,7 +114,8 @@ for i, client in enumerate(time_entries_extended_df.client_name.unique()):
     x_actual = time_entries_sum_per_week_df.index.tolist()
     y_actual = time_entries_sum_per_week_df["duration_hours"].tolist()
 
-    bar = ax.plot(range(len(x_actual)), y_actual, "-o", label=client)
+    bar = ax.plot([item.replace("-","") for item in x_actual], y_actual, "-o", label=client)
+    #bar = ax.plot(range(len(x_actual)), y_actual, "-o", label=client)
 
 ax.set(xlabel='Calendar week', ylabel='Hours',
        title=f'Working hours (total overhours: {over_hours})')

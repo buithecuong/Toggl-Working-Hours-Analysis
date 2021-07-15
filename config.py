@@ -11,7 +11,7 @@ mysql = {'user': 'root',
 write_to_mysql = False
 
 #defines the time frame the script uses to calculate your over time
-start_date = datetime(2021, 1, 1)
+start_date = datetime(2021, 1, 4)
 end_date = datetime.today()
 
 #working hours per day
