@@ -9,11 +9,24 @@ from datetime import datetime
 import config
 from urllib.parse import urlencode
 import os
+import psycopg2
 
 def connect_to_database(password, database, user, port, host):
     '''Connects to mysql database'''
 
     cnx = mysql.connector.connect(user=user,
+                                  password=password,
+                                  host=host,
+                                  port=port,
+                                  database=database)
+    cursor = cnx.cursor()
+
+    return(cnx, cursor)
+
+def connect_to_postgres_database(password, database, user, port, host):
+    '''Connects to postgres database'''
+
+    cnx = psycopg2.connector.connect(user=user,
                                   password=password,
                                   host=host,
                                   port=port,
@@ -31,7 +44,7 @@ def connect_to_toggl(api_token):
     string = api_token + ':api_token'
     headers = {
         'Authorization': 'Basic ' + base64.b64encode(string.encode('ascii')).decode("utf-8")}
-    url = 'https://www.toggl.com/api/v8/me'
+    url = 'https://api.track.toggl.com/api/v8/me'
 
     response = requests.get(url, headers=headers)
     response = response.json()
@@ -46,10 +59,10 @@ def connect_to_toggl(api_token):
 def get_all_clients_and_projects(my_workspace, headers):
     '''Gets all clients and projects for your workspace id'''
 
-    url = 'https://www.toggl.com/api/v8/workspaces/' + str(my_workspace) + '/clients'
+    url = 'https://api.track.toggl.com/api/v8/workspaces/' + str(my_workspace) + '/clients'
     clients = requests.get(url, headers=headers).json()
 
-    url = 'https://www.toggl.com/api/v8/workspaces/' + str(my_workspace) + '/projects'
+    url = 'https://api.track.toggl.com/api/v8/workspaces/' + str(my_workspace) + '/projects'
     projects = requests.get(url, headers=headers).json()
 
     return clients, projects
@@ -93,19 +106,26 @@ def query_public_holidays_from_db():
     :return: public_holidays_df
     '''
 
-    cnx = mysql.connector.connect(
-                host=config.mysql["host"],
-                user=config.mysql["user"],
-                password=config.mysql["password"],
-                port=config.mysql["port"],
+    # cnx = mysql.connector.connect(
+    #             host=config.mysql["host"],
+    #             user=config.mysql["user"],
+    #             password=config.mysql["password"],
+    #             port=config.mysql["port"],
+    # )
+
+    cnx = psycopg2.connect(
+                host=config.postgres["host"],
+                user=config.postgres["user"],
+                password=config.postgres["password"],
+                port=config.postgres["port"],
+                database=config.postgres["database"]
     )
 
+    cur = cnx.cursor()
 
-    mycursor = cnx.cursor()
+    cur.execute("SELECT * FROM public.public_holidays")
 
-    mycursor.execute("SELECT date FROM calc_working_hours.public_holidays;")
-
-    myresult = mycursor.fetchall()
+    myresult = cur.fetchall()
 
     public_holidays = []
 
@@ -123,16 +143,25 @@ def query_vacation_days_from_db():
     :return: vacation_days
     '''
 
-    cnx = mysql.connector.connect(
-                host=config.mysql["host"],
-                user=config.mysql["user"],
-                password=config.mysql["password"],
-                port=config.mysql["port"],
+    # cnx = mysql.connector.connect(
+    #             host=config.mysql["host"],
+    #             user=config.mysql["user"],
+    #             password=config.mysql["password"],
+    #             port=config.mysql["port"],
+    # )
+
+
+    cnx = psycopg2.connect(
+                host=config.postgres["host"],
+                user=config.postgres["user"],
+                password=config.postgres["password"],
+                port=config.postgres["port"],
+                database=config.postgres["database"]
     )
 
     mycursor = cnx.cursor()
 
-    mycursor.execute("SELECT days FROM calc_working_hours.vacation_days;")
+    mycursor.execute("SELECT vacation_days FROM public.vacation_days;")
 
     myresult = mycursor.fetchall()
 

@@ -51,25 +51,53 @@ import pandas as pd
 #
 # fig.savefig(r"./results/filename.png")
 
-cnx = mysql.connector.connect(
-            host="dashboardserver.germanywestcentral.cloudapp.azure.com",
-            user=config.mysql["user"],
-            password=config.mysql["password"],
-            port=config.mysql["port"],
+# cnx = mysql.connector.connect(
+#             host="dashboardserver.germanywestcentral.cloudapp.azure.com",
+#             user=config.mysql["user"],
+#             password=config.mysql["password"],
+#             port=config.mysql["port"],
+# )
+#
+#
+# mycursor = cnx.cursor()
+#
+# mycursor.execute("SELECT date FROM calc_working_hours.public_holidays;")
+#
+# myresult = mycursor.fetchall()
+#
+# public_holidays = []
+#
+# for x in myresult:
+#     public_holidays.append(x[0])
+#
+# public_holidays_df = pd.DataFrame(data=public_holidays)
+# public_holidays_df = public_holidays_df.rename(columns={0: "days"})
+# pass
+
+import psycopg2
+
+
+# cnx = psycopg2.connect(
+#             host='127.0.0.1',
+#             user='postgres',
+#             password=os.environ['Postgres_secret'],
+#             port='5432',
+#             database='calc_working_hours'
+# )
+
+cnx = psycopg2.connect(
+    host=config.postgres["host"],
+    user=config.postgres["user"],
+    password=config.postgres["password"],
+    port=config.postgres["port"],
+    database=config.postgres["database"]
 )
 
 
-mycursor = cnx.cursor()
+cur = cnx.cursor()
 
-mycursor.execute("SELECT date FROM calc_working_hours.public_holidays;")
+cur.execute("SELECT * FROM public.public_holidays")
 
-myresult = mycursor.fetchall()
+myresult = cur.fetchall()
 
-public_holidays = []
-
-for x in myresult:
-    public_holidays.append(x[0])
-
-public_holidays_df = pd.DataFrame(data=public_holidays)
-public_holidays_df = public_holidays_df.rename(columns={0: "days"})
-pass
+test="test"

@@ -1,7 +1,7 @@
 from helper_functions import connect_to_database, connect_to_toggl, \
     get_all_clients_and_projects, get_all_time_entries, data_processing, \
     define_working_days_table, write_toggl_data_in_database, \
-    write_working_days_list
+    write_working_days_list, connect_to_postgres_database
 import config
 from datetime import datetime, date
 import pandas as pd
@@ -49,11 +49,17 @@ def write_tables_to_mysql(time_entries_extended, working_days_df):
     '''write the collected and processed data to tables in the MySQL database'''
 
     try:
-        cnx, cursor = connect_to_database(password=config.mysql["user"],
-                                          database=config.mysql["database"],
-                                          user=config.mysql["user"],
-                                          port=config.mysql["port"],
-                                          host=config.mysql["host"])
+        cnx, cursor = connect_to_postgres_database(password=config.postgres["user"],
+                                                      database=config.postgres["database"],
+                                                      user=config.postgres["user"],
+                                                      port=config.postgres["port"],
+                                                      host=config.postgres["host"])
+
+        # cnx, cursor = connect_to_database(password=config.mysql["user"],
+        #                                   database=config.mysql["database"],
+        #                                   user=config.mysql["user"],
+        #                                   port=config.mysql["port"],
+        #                                   host=config.mysql["host"])
 
         return_messages_time_entries = write_toggl_data_in_database(cursor, cnx, time_entries_extended)
         for item in return_messages_time_entries:
@@ -71,7 +77,7 @@ if config.write_to_mysql == True:
 
 def sum_worked_hours_by_week(time_entries_extended_df):
     '''
-    Sums up the hours in the Toogl time entries by the calendar week
+    Sums up the hours in the Toggl time entries by the calendar week
     :return: DataFrame with CW and the sum of the time entries duration in this week
     '''
 

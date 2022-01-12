@@ -6,6 +6,7 @@ import pandas as pd
 import mysql.connector
 import config
 import pprint
+import psycopg2
 
 '''
 The following code retrieves the source code from https://www.ferienwiki.de/feiertage/de/bayern and
@@ -41,11 +42,11 @@ public_holidays_df = public_holidays_df.rename(columns={0: "date"})
 #                               port=config.mysql["port"],
 #                               host=config.mysql["host"])
 
-cnx = mysql.connector.connect(
-            host=config.mysql["host"],
-            user=config.mysql["user"],
-            password=config.mysql["password"],
-            port=config.mysql["port"],
+cnx = psycopg2.connect(
+            host=config.postgres["host"],
+            user=config.postgres["user"],
+            password=config.postgres["password"],
+            port=config.postgres["port"],
 )
 
 cursor = cnx.cursor()
