@@ -1,4 +1,4 @@
-import mysql.connector
+#import mysql.connector
 import base64
 from datetime import date, timedelta, timezone
 import pandas as pd
@@ -9,31 +9,31 @@ from datetime import datetime
 import config
 from urllib.parse import urlencode
 import os
-import psycopg2
+#import psycopg2
 
-def connect_to_database(password, database, user, port, host):
-    '''Connects to mysql database'''
+# def connect_to_database(password, database, user, port, host):
+#     '''Connects to mysql database'''
+#
+#     cnx = mysql.connector.connect(user=user,
+#                                   password=password,
+#                                   host=host,
+#                                   port=port,
+#                                   database=database)
+#     cursor = cnx.cursor()
+#
+#     return(cnx, cursor)
 
-    cnx = mysql.connector.connect(user=user,
-                                  password=password,
-                                  host=host,
-                                  port=port,
-                                  database=database)
-    cursor = cnx.cursor()
-
-    return(cnx, cursor)
-
-def connect_to_postgres_database(password, database, user, port, host):
-    '''Connects to postgres database'''
-
-    cnx = psycopg2.connector.connect(user=user,
-                                  password=password,
-                                  host=host,
-                                  port=port,
-                                  database=database)
-    cursor = cnx.cursor()
-
-    return(cnx, cursor)
+# def connect_to_postgres_database(password, database, user, port, host):
+#     '''Connects to postgres database'''
+#
+#     cnx = psycopg2.connector.connect(user=user,
+#                                   password=password,
+#                                   host=host,
+#                                   port=port,
+#                                   database=database)
+#     cursor = cnx.cursor()
+#
+#     return(cnx, cursor)
 
 def connect_to_toggl(api_token):
     """Connect to toggl and get response containing information to the
@@ -100,75 +100,95 @@ def data_processing(clients,projects,time_entries):
 
     return time_entries_extended_df
 
-def query_public_holidays_from_db():
+# def query_public_holidays_from_db():
+#     '''
+#     Queries data from table public_holidays and saves them in a list
+#     :return: public_holidays_df
+#     '''
+#
+#     # cnx = mysql.connector.connect(
+#     #             host=config.mysql["host"],
+#     #             user=config.mysql["user"],
+#     #             password=config.mysql["password"],
+#     #             port=config.mysql["port"],
+#     # )
+#
+#     cnx = psycopg2.connect(
+#                 host=config.postgres["host"],
+#                 user=config.postgres["user"],
+#                 password=config.postgres["password"],
+#                 port=config.postgres["port"],
+#                 database=config.postgres["database"]
+#     )
+#
+#     cur = cnx.cursor()
+#
+#     cur.execute("SELECT * FROM public.public_holidays")
+#
+#     myresult = cur.fetchall()
+#
+#     public_holidays = []
+#
+#     for x in myresult:
+#         public_holidays.append(x[0])
+#
+#     # public_holidays_df = pd.DataFrame(data=public_holidays)
+#     # public_holidays_df = public_holidays_df.rename(columns={0: "days"})
+#
+#     return public_holidays
+
+def query_public_holidays_from_csv():
     '''
-    Queries data from table public_holidays and saves them in a list
+    Queries data from file public_holidays and saves them in a list
     :return: public_holidays_df
     '''
 
-    # cnx = mysql.connector.connect(
-    #             host=config.mysql["host"],
-    #             user=config.mysql["user"],
-    #             password=config.mysql["password"],
-    #             port=config.mysql["port"],
-    # )
-
-    cnx = psycopg2.connect(
-                host=config.postgres["host"],
-                user=config.postgres["user"],
-                password=config.postgres["password"],
-                port=config.postgres["port"],
-                database=config.postgres["database"]
-    )
-
-    cur = cnx.cursor()
-
-    cur.execute("SELECT * FROM public.public_holidays")
-
-    myresult = cur.fetchall()
-
-    public_holidays = []
-
-    for x in myresult:
-        public_holidays.append(x[0])
-
-    # public_holidays_df = pd.DataFrame(data=public_holidays)
-    # public_holidays_df = public_holidays_df.rename(columns={0: "days"})
+    public_holidays = pd.read_csv(r'./public_holidays.csv')
 
     return public_holidays
 
-def query_vacation_days_from_db():
+# def query_vacation_days_from_db():
+#     '''
+#     Queries data from table vacation_days and saves them in a list
+#     :return: vacation_days
+#     '''
+#
+#     # cnx = mysql.connector.connect(
+#     #             host=config.mysql["host"],
+#     #             user=config.mysql["user"],
+#     #             password=config.mysql["password"],
+#     #             port=config.mysql["port"],
+#     # )
+#
+#
+#     cnx = psycopg2.connect(
+#                 host=config.postgres["host"],
+#                 user=config.postgres["user"],
+#                 password=config.postgres["password"],
+#                 port=config.postgres["port"],
+#                 database=config.postgres["database"]
+#     )
+#
+#     mycursor = cnx.cursor()
+#
+#     mycursor.execute("SELECT vacation_days FROM public.vacation_days;")
+#
+#     myresult = mycursor.fetchall()
+#
+#     vacation_days = []
+#
+#     for x in myresult:
+#         vacation_days.append(x[0])
+#
+#     return vacation_days
+
+def query_vacation_days_from_csv():
     '''
     Queries data from table vacation_days and saves them in a list
     :return: vacation_days
     '''
 
-    # cnx = mysql.connector.connect(
-    #             host=config.mysql["host"],
-    #             user=config.mysql["user"],
-    #             password=config.mysql["password"],
-    #             port=config.mysql["port"],
-    # )
-
-
-    cnx = psycopg2.connect(
-                host=config.postgres["host"],
-                user=config.postgres["user"],
-                password=config.postgres["password"],
-                port=config.postgres["port"],
-                database=config.postgres["database"]
-    )
-
-    mycursor = cnx.cursor()
-
-    mycursor.execute("SELECT vacation_days FROM public.vacation_days;")
-
-    myresult = mycursor.fetchall()
-
-    vacation_days = []
-
-    for x in myresult:
-        vacation_days.append(x[0])
+    vacation_days = pd.read_csv(r'./vacation_days.csv')
 
     return vacation_days
 
@@ -184,8 +204,8 @@ def define_working_days_table(start_date, end_date):
                         - weekend (WE) - saturday and sunday
     """
 
-    public_holidays = query_public_holidays_from_db()
-    vacation_days = query_vacation_days_from_db()
+    public_holidays = query_public_holidays_from_csv()
+    vacation_days = query_vacation_days_from_csv()
 
     all_days = []
     for n in range(int((end_date - start_date).days)):
@@ -230,121 +250,121 @@ def define_working_days_table(start_date, end_date):
     working_days_df = pd.DataFrame(data=working_days)
     return working_days_df
 
-def write_toggl_data_in_database(cursor, cnx, time_entries_extended):
-    return_messages=[]
-    try:
-        cursor.execute("CREATE TABLE `dashboard`.`toggl_time_entries` ("
-                       "`id` INT NOT NULL,"
-                       "`start` DATETIME NULL,"
-                       "`stop` DATETIME NULL,"
-                       "`duration` INT NULL,"
-                       "`description` VARCHAR(45) NULL,"
-                       "`project_name` VARCHAR(45) NULL,"
-                       "`client_name` VARCHAR(45) NULL,"
-                       "PRIMARY KEY (`id`));")
-        cnx.commit()
-    except mysql.connector.Error as e:
-        return_messages.append("Error code:" + str(e.errno))
-        return_messages.append("SQLSTATE value:" + str(e.sqlstate))
-        return_messages.append("Error message:" + str(e.msg))
-        return_messages.append("Error:" + str(e))
+# def write_toggl_data_in_database(cursor, cnx, time_entries_extended):
+#     return_messages=[]
+#     try:
+#         cursor.execute("CREATE TABLE `dashboard`.`toggl_time_entries` ("
+#                        "`id` INT NOT NULL,"
+#                        "`start` DATETIME NULL,"
+#                        "`stop` DATETIME NULL,"
+#                        "`duration` INT NULL,"
+#                        "`description` VARCHAR(45) NULL,"
+#                        "`project_name` VARCHAR(45) NULL,"
+#                        "`client_name` VARCHAR(45) NULL,"
+#                        "PRIMARY KEY (`id`));")
+#         cnx.commit()
+#     except mysql.connector.Error as e:
+#         return_messages.append("Error code:" + str(e.errno))
+#         return_messages.append("SQLSTATE value:" + str(e.sqlstate))
+#         return_messages.append("Error message:" + str(e.msg))
+#         return_messages.append("Error:" + str(e))
+#
+#         try:
+#             cursor.execute("DROP TABLE `dashboard`.`toggl_time_entries`")
+#             return_messages.append("Current table toggl_time_entries was deleted successfully")
+#         except:
+#             return_messages.append("Error while deleting table toggl_time_entries")
+#
+#         try:
+#             cursor.execute("CREATE TABLE `dashboard`.`toggl_time_entries` ("
+#                            "`id` INT NOT NULL,"
+#                            "`start` DATETIME NULL,"
+#                            "`stop` DATETIME NULL,"
+#                            "`duration` INT NULL,"
+#                            "`description` VARCHAR(45) NULL,"
+#                            "`project_name` VARCHAR(45) NULL,"
+#                            "`client_name` VARCHAR(45) NULL,"
+#                            "PRIMARY KEY (`id`));")
+#             cnx.commit()
+#             return_messages.append("Table toggl_time_entries was created successfully")
+#         except:
+#             return_messages.append("Error while creating table toggl_time_entries")
+#
+#     # Create a new record
+#     sql = "INSERT INTO `toggl_time_entries` (`id`, `start`, `stop`, `duration`, `description`, `project_name`, `client_name`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+#     for index, line in time_entries_extended.iterrows():
+#         if int(line['duration']) > 0:
+#             try:
+#                 cursor.execute(sql, (line['id'],
+#                                      line['start'],
+#                                      line['stop'],
+#                                      line['duration'],
+#                                      line['description'],
+#                                      line['project_name'],
+#                                      line['client_name']))
+#                 cnx.commit()
+#             except mysql.connector.Error as e:
+#                 return(return_messages.append("Fail during ADDING ROWS to table toggl_time_entries"))
+#                 return_messages.append("Error code:" + str(e.errno))
+#                 return_messages.append("SQLSTATE value:" + str(e.sqlstate))
+#                 return_messages.append("Error message:" + str(e.msg))
+#                 return_messages.append("Error:" + str(e))
+#
+#     return return_messages
 
-        try:
-            cursor.execute("DROP TABLE `dashboard`.`toggl_time_entries`")
-            return_messages.append("Current table toggl_time_entries was deleted successfully")
-        except:
-            return_messages.append("Error while deleting table toggl_time_entries")
-
-        try:
-            cursor.execute("CREATE TABLE `dashboard`.`toggl_time_entries` ("
-                           "`id` INT NOT NULL,"
-                           "`start` DATETIME NULL,"
-                           "`stop` DATETIME NULL,"
-                           "`duration` INT NULL,"
-                           "`description` VARCHAR(45) NULL,"
-                           "`project_name` VARCHAR(45) NULL,"
-                           "`client_name` VARCHAR(45) NULL,"
-                           "PRIMARY KEY (`id`));")
-            cnx.commit()
-            return_messages.append("Table toggl_time_entries was created successfully")
-        except:
-            return_messages.append("Error while creating table toggl_time_entries")
-
-    # Create a new record
-    sql = "INSERT INTO `toggl_time_entries` (`id`, `start`, `stop`, `duration`, `description`, `project_name`, `client_name`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-    for index, line in time_entries_extended.iterrows():
-        if int(line['duration']) > 0:
-            try:
-                cursor.execute(sql, (line['id'],
-                                     line['start'],
-                                     line['stop'],
-                                     line['duration'],
-                                     line['description'],
-                                     line['project_name'],
-                                     line['client_name']))
-                cnx.commit()
-            except mysql.connector.Error as e:
-                return(return_messages.append("Fail during ADDING ROWS to table toggl_time_entries"))
-                return_messages.append("Error code:" + str(e.errno))
-                return_messages.append("SQLSTATE value:" + str(e.sqlstate))
-                return_messages.append("Error message:" + str(e.msg))
-                return_messages.append("Error:" + str(e))
-
-    return return_messages
-
-def write_working_days_list(cursor, cnx, working_days_df):
-    '''Creates the table working_days in the mysql database'''
-
-    return_messages=[]
-    try:
-        cursor.execute("CREATE TABLE `dashboard`.`working_days` ("
-                       "`id` INT NOT NULL,"
-                       "`days` DATETIME NULL,"
-                       "`type` VARCHAR(45) NULL,"
-                       "`working_hours` INT NULL,"
-                       "PRIMARY KEY (`id`));")
-        cnx.commit()
-    except mysql.connector.Error as e:
-        return_messages.append("Error code:" + str(e.errno))
-        return_messages.append("SQLSTATE value:" + str(e.sqlstate))
-        return_messages.append("Error message:" + str(e.msg))
-        return_messages.append("Error:" + str(e))
-
-        try:
-            cursor.execute("DROP TABLE `dashboard`.`working_days`")
-            return_messages.append("Current table working_days was deleted successfully")
-        except:
-            return_messages.append("Error while deleting table working_days")
-
-        try:
-            cursor.execute("CREATE TABLE `dashboard`.`working_days` ("
-                           "`id` INT NOT NULL,"
-                           "`days` DATETIME NULL,"
-                           "`type` VARCHAR(45) NULL,"
-                           "`working_hours` INT NULL,"
-                           "PRIMARY KEY (`id`));")
-            cnx.commit()
-            return_messages.append("Table working_days was created successfully")
-        except:
-            return_messages.append("Error while creating table working_days")
-
-    # Create a new record
-    sql = "INSERT INTO `working_days` (`id`, `days`, `type`, `working_hours`) VALUES (%s, %s, %s, %s)"
-    for index, line in working_days_df.iterrows():
-        try:
-            cursor.execute(sql, (index,
-                                 line['days'],
-                                 line['type'],
-                                 line['working_hours']))
-            cnx.commit()
-        except:
-            return(return_messages.append("Fail during ADDING ROWS to table working_days"))
-            return_messages.append("Error code:" + str(e.errno))
-            return_messages.append("SQLSTATE value:" + str(e.sqlstate))
-            return_messages.append("Error message:" + str(e.msg))
-            return_messages.append("Error:" + str(e))
-
-    return return_messages
+# def write_working_days_list(cursor, cnx, working_days_df):
+#     '''Creates the table working_days in the mysql database'''
+#
+#     return_messages=[]
+#     try:
+#         cursor.execute("CREATE TABLE `dashboard`.`working_days` ("
+#                        "`id` INT NOT NULL,"
+#                        "`days` DATETIME NULL,"
+#                        "`type` VARCHAR(45) NULL,"
+#                        "`working_hours` INT NULL,"
+#                        "PRIMARY KEY (`id`));")
+#         cnx.commit()
+#     except mysql.connector.Error as e:
+#         return_messages.append("Error code:" + str(e.errno))
+#         return_messages.append("SQLSTATE value:" + str(e.sqlstate))
+#         return_messages.append("Error message:" + str(e.msg))
+#         return_messages.append("Error:" + str(e))
+#
+#         try:
+#             cursor.execute("DROP TABLE `dashboard`.`working_days`")
+#             return_messages.append("Current table working_days was deleted successfully")
+#         except:
+#             return_messages.append("Error while deleting table working_days")
+#
+#         try:
+#             cursor.execute("CREATE TABLE `dashboard`.`working_days` ("
+#                            "`id` INT NOT NULL,"
+#                            "`days` DATETIME NULL,"
+#                            "`type` VARCHAR(45) NULL,"
+#                            "`working_hours` INT NULL,"
+#                            "PRIMARY KEY (`id`));")
+#             cnx.commit()
+#             return_messages.append("Table working_days was created successfully")
+#         except:
+#             return_messages.append("Error while creating table working_days")
+#
+#     # Create a new record
+#     sql = "INSERT INTO `working_days` (`id`, `days`, `type`, `working_hours`) VALUES (%s, %s, %s, %s)"
+#     for index, line in working_days_df.iterrows():
+#         try:
+#             cursor.execute(sql, (index,
+#                                  line['days'],
+#                                  line['type'],
+#                                  line['working_hours']))
+#             cnx.commit()
+#         except:
+#             return(return_messages.append("Fail during ADDING ROWS to table working_days"))
+#             return_messages.append("Error code:" + str(e.errno))
+#             return_messages.append("SQLSTATE value:" + str(e.sqlstate))
+#             return_messages.append("Error message:" + str(e.msg))
+#             return_messages.append("Error:" + str(e))
+#
+#     return return_messages
 
 def send_results_per_email():
     # import the smtplib module. It should be included in Python by default

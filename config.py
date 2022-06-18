@@ -7,22 +7,22 @@ from datetime import date, datetime
 #          'port': '3308',
 #          'database': 'calc_working_hours',
 #          'raise_on_warnings': True}
-
-postgres = {'user': 'postgres',
-         'password': os.environ['Postgres_secret'],
-         'host': '127.0.0.1',
-         'port': '5432',
-         'database': 'calc_working_hours'}
+#
+# postgres = {'user': 'postgres',
+#          'password': os.environ['Postgres_secret'],
+#          'host': '127.0.0.1',
+#          'port': '5432',
+#          'database': 'calc_working_hours'}
 
 # decides if results should be written back to database
 write_to_mysql = False
 
 #defines the time frame the script uses to calculate your over time
-start_date = datetime(2022, 1, 1)
+start_date = datetime(2022, 6, 1)
 end_date = datetime.today()
 
 #working hours per day
-target_hours_per_day = 7.2
+target_hours_per_day = 7
 
 #needed for authentification, you can find the token to your acc at the the end of the profile
 #settings page "https://track.toggl.com/profile"
