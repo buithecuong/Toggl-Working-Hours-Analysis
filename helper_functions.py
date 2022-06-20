@@ -9,6 +9,8 @@ from datetime import datetime
 import config
 from urllib.parse import urlencode
 import os
+import pathlib
+
 #import psycopg2
 
 # def connect_to_database(password, database, user, port, host):
@@ -143,8 +145,12 @@ def query_public_holidays_from_csv():
     :return: public_holidays_df
     '''
 
-    public_holidays = pd.read_csv(r'./public_holidays.csv')
+    dir = pathlib.Path(__file__).parent.absolute()
+    filename = r'/public_holidays.csv'
+    path = str(dir) + filename
 
+    public_holidays = pd.read_csv(path)
+    public_holidays['date'] = pd.to_datetime(public_holidays['date'], format='%d.%m.%Y')
     return public_holidays
 
 # def query_vacation_days_from_db():
@@ -188,7 +194,12 @@ def query_vacation_days_from_csv():
     :return: vacation_days
     '''
 
-    vacation_days = pd.read_csv(r'./vacation_days.csv')
+    dir = pathlib.Path(__file__).parent.absolute()
+    filename = r'/vacation_days.csv'
+    path = str(dir) + filename
+
+    vacation_days = pd.read_csv(path)
+    vacation_days['vacation_days'] = pd.to_datetime(vacation_days['vacation_days'], format='%d.%m.%Y')
 
     return vacation_days
 
@@ -366,12 +377,3 @@ def define_working_days_table(start_date, end_date):
 #
 #     return return_messages
 
-def send_results_per_email():
-    # import the smtplib module. It should be included in Python by default
-    import smtplib
-    # set up the SMTP server
-    s = smtplib.SMTP(host='your_host_address_here', port=your_port_here)
-    s.starttls()
-    s.login(MY_ADDRESS, PASSWORD)
-
-    s = smtplib.SMTP(host='smtp-mail.outlook.com', port=587)
