@@ -10,6 +10,7 @@ import config
 from urllib.parse import urlencode
 import os
 import pathlib
+import numpy as np
 
 #import psycopg2
 
@@ -151,6 +152,15 @@ def query_public_holidays_from_csv():
 
     public_holidays = pd.read_csv(path)
     public_holidays['date'] = pd.to_datetime(public_holidays['date'], format='%d.%m.%Y')
+
+    from datetime import datetime
+
+    def foo(row):
+        datetime_1 = datetime.strptime(str(date), '%Y-%m-%d %H:%M:%S')
+        return datetime_1
+
+    public_holidays['date'].apply(foo, axis=1)
+
     return public_holidays
 
 # def query_vacation_days_from_db():
@@ -201,6 +211,13 @@ def query_vacation_days_from_csv():
     vacation_days = pd.read_csv(path)
     vacation_days['vacation_days'] = pd.to_datetime(vacation_days['vacation_days'], format='%d.%m.%Y')
 
+    from datetime import datetime
+
+    def foo(row: pd.Series):
+        row['vacation_days'] = datetime.strptime(str(row['vacation_days']), '%Y-%m-%d %H:%M:%S')
+
+    vacation_days.apply(foo, axis=1)
+
     return vacation_days
 
 def define_working_days_table(start_date, end_date):
@@ -233,7 +250,7 @@ def define_working_days_table(start_date, end_date):
 
     all_days_we_ph = []
     for item in all_days_we:
-        if item['days'] in public_holidays:
+        if np.datetime64(item['days']) in public_holidays:
             all_days_we_ph.append({'days': item['days'], 'type': "PH"})
         else:
             all_days_we_ph.append({'days': item['days'], 'type': item['type']})
