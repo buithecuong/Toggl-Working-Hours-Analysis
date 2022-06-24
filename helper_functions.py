@@ -151,17 +151,16 @@ def query_public_holidays_from_csv():
     path = str(dir) + filename
 
     public_holidays = pd.read_csv(path)
-    public_holidays['date'] = pd.to_datetime(public_holidays['date'], format='%d.%m.%Y')
+    #public_holidays['date'] = pd.to_datetime(public_holidays['date'], format='%d.%m.%Y')
 
-    from datetime import datetime
+    value_list = public_holidays.values.tolist()
+    public_holidays_list = []
 
-    def foo(row):
-        datetime_1 = datetime.strptime(str(date), '%Y-%m-%d %H:%M:%S')
-        return datetime_1
+    for value in value_list:
+        value = datetime.strptime(value[0], "%d.%m.%Y")
+        public_holidays_list.append(value)
 
-    public_holidays['date'].apply(foo, axis=1)
-
-    return public_holidays
+    return public_holidays_list
 
 # def query_vacation_days_from_db():
 #     '''
@@ -209,16 +208,15 @@ def query_vacation_days_from_csv():
     path = str(dir) + filename
 
     vacation_days = pd.read_csv(path)
-    vacation_days['vacation_days'] = pd.to_datetime(vacation_days['vacation_days'], format='%d.%m.%Y')
 
-    from datetime import datetime
+    value_list = vacation_days.values.tolist()
+    vacation_days_list = []
 
-    def foo(row: pd.Series):
-        row['vacation_days'] = datetime.strptime(str(row['vacation_days']), '%Y-%m-%d %H:%M:%S')
+    for value in value_list:
+        value = datetime.strptime(value[0], "%d.%m.%Y")
+        vacation_days_list.append(value)
 
-    vacation_days.apply(foo, axis=1)
-
-    return vacation_days
+    return vacation_days_list
 
 def define_working_days_table(start_date, end_date):
     """

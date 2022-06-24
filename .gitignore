@@ -3,6 +3,7 @@ __pycache__/
 __chrome_driver__
 .idea
 venv
+/venv
 *.py[cod]
 *$py.class
 /results

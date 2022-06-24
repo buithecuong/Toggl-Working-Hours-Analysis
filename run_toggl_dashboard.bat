@@ -1,0 +1,1 @@
+C:\Users\z004j58u\repos\sonstiges\Toggl-Working-Hours-Analysis\venv\Scripts\python.exe C:\Users\z004j58u\repos\sonstiges\Toggl-Working-Hours-Analysis\toggl_dashboard.py

@@ -7,6 +7,7 @@ Collects Toggl time tracking events and uses them to analyze the time you are wo
 ## Built With
 
 * Python 
+* TogglAPI
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
